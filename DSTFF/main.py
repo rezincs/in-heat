@@ -7,14 +7,37 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 import json
 import os
 from datetime import datetime
+import secrets
+from markupsafe import escape
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend communication
+
+# SECURITY: Essential security configuration
+app.secret_key = secrets.token_hex(16)
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SECURE'] = True  # PythonAnywhere provides HTTPS
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+# SECURITY: Add security headers
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    return response
 
 # Serve the frontend files
 @app.route('/')
 def serve_index():
     return send_file('index.html')
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(
+        app.root_path,  # Remove the 'image' folder path
+        'favicon.ico', mimetype='image/vnd.microsoft.icon'
+    )
 
 @app.route('/style.css')
 def serve_css():
@@ -26,7 +49,8 @@ def serve_css():
 
 @app.route('/images/<path:filename>')
 def serve_image(filename):
-    return send_from_directory('images', filename)
+    safe_filename = escape(filename)  # Prevent malicious filenames
+    return send_from_directory('images', safe_filename)
 
 @app.route('/settlement_dasma.geojson')
 def serve_geojson():
@@ -671,4 +695,4 @@ def get_time_series(fid):
         return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=False, port=5000)  # NEVER use debug=True online!
