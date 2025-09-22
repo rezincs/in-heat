@@ -32,12 +32,35 @@ def add_security_headers(response):
 def serve_index():
     return send_file('index.html')
 
+@app.route('/debug')
+def debug():
+    import os
+    
+    # Check app root path
+    root_files = os.listdir(app.root_path)
+    
+    # Check if images folder exists
+    images_path = os.path.join(app.root_path, 'images')
+    images_exists = os.path.exists(images_path)
+    
+    # Check images folder contents if it exists
+    if images_exists:
+        images_files = os.listdir(images_path)
+    else:
+        images_files = "Images folder not found"
+    
+    return f"""
+    <h3>Debug Info:</h3>
+    <p><strong>App root path:</strong> {app.root_path}</p>
+    <p><strong>Files in root:</strong> {root_files}</p>
+    <p><strong>Images folder exists:</strong> {images_exists}</p>
+    <p><strong>Images folder path:</strong> {images_path}</p>
+    <p><strong>Files in images:</strong> {images_files}</p>
+    """
+
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory(
-        app.root_path,  # Remove the 'image' folder path
-        'favicon.ico', mimetype='image/vnd.microsoft.icon'
-    )
+    return send_from_directory('images', 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/style.css')
 def serve_css():
