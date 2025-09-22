@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IN-HEAT - Dasmariñas Heat Index Monitoring</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+       crossorigin=""/>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+       crossorigin=""></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+
+<!-- Map Container -->
+<div id="map"></div>
+
+<!-- Main Overlay -->
+<div class="main-overlay">
+  <!-- Header -->
+  <div class="flex-container">
+    <h1 class="title">IN-HEAT</h1>
+    <div class="search-container">
+      <input id="brgy" placeholder="Search Barangay" class="input" type="text" 
+             name="brgy_search" autocomplete="off" autocorrect="off" 
+             autocapitalize="off" spellcheck="false">
+      <div id="searchDropdown" class="dropdown"></div>
+    </div>
+  </div>
+
+
+
+  <!-- Year Slider -->
+  <div class="slider-container">
+    <div class="year-display" id="yearDisplay">2024</div>
+    <div class="slider-wrapper">
+      <input type="range" min="2020" max="2050" value="2024" class="year-slider" id="yearSlider">
+    </div>
+    <div class="slider-marks">
+      <span class="slider-mark">2020</span>
+      <span class="slider-mark">2025</span>
+      <span class="slider-mark">2030</span>
+      <span class="slider-mark">2035</span>
+      <span class="slider-mark">2040</span>
+      <span class="slider-mark">2045</span>
+      <span class="slider-mark">2050</span>
+    </div>
+  </div>
+</div>
+
+<!-- Welcome Popup -->
+<div class="popup-overlay" id="popupOverlay"> 
+  <div class="popup">
+    <h2>Welcome to IN-HEAT</h2>
+    <p>Dasmariñas Heat Index Monitoring System</p>
+    <p>Monitor heat index, vegetation, and urban development patterns across Dasmariñas City from 2020-2050.</p>
+    <button class="popup-btn" id="acceptBtn">Get Started</button>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="item">
+    <img class="icon" src="images/earth-green.svg" alt="Heat Index">
+    <div class="text">Dasma Heat Index</div>
+  </div>
+  <hr />
+  <section>
+    <div class="item">
+      <img class="icon" src="images/tree-solid-full (1).svg" alt="Vegetation">
+      <button class="trigger-btn" onclick="openDataPopup('vegetation')">
+        <div class="text">Vegetation Index</div>
+      </button>
+      <div class="tooltip">NDVI - Normalized Difference Vegetation Index</div>
+    </div>
+
+    <div class="item">
+      <img class="icon" src="images/building-solid-full (2).svg" alt="Urban">
+      <button class="trigger-btn" onclick="openDataPopup('urban')">
+        <div class="text">Urban Index</div>
+      </button>
+      <div class="tooltip">NDBI - Normalized Difference Built-up Index</div>
+    </div>
+
+    <div class="item">
+      <img class="icon" src="images/temperature-green (1).svg" alt="Heat">
+      <button class="trigger-btn" onclick="openDataPopup('heat')">
+        <div class="text">Heat Index</div>
+      </button>
+      <div class="tooltip">Heat Index with Temperature & Humidity</div>
+    </div>
+  </section>
+</div>
+
+<!-- Data Popups -->
+<!-- Data Popups -->
+<div id="vegetation-popup" class="side-popup">
+  <div class="popup">
+    <button class="close-btn" onclick="closePopup('vegetation')">&times;</button>
+    <h2>Vegetation Index (NDVI)</h2>
+    <div id="vegetation-summary" class="data-summary">
+      <div class="data-values">
+        <div class="data-card">
+          <div class="label">Vegetation Index</div>
+          <div id="vegetation-value" class="value">—</div>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-title">Legend:</div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#f5f5f0"></div>
+          <div class="legend-text">Very Scarce Vegetation (&lt;0.1)</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#dcd2b4"></div>
+          <div class="legend-text">Low Vegetation (0.1 - 0.25)</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#c8dc8c"></div>
+          <div class="legend-text">Urbanized Areas (0.25 - 0.4)</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#91bf51"></div>
+          <div class="legend-text">Moderate Vegetation (0.4 - 0.55)</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#70a33f"></div>
+          <div class="legend-text">Agricultural Areas (0.55 - 0.7)</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#4f892d"></div>
+          <div class="legend-text">High Vegetation (0.7 - 0.8)</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#306d1c"></div>
+          <div class="legend-text">Dense Forest (&gt;0.8)</div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="vegetation-chart"></canvas>
+    </div>
+  </div>
+</div>
+
+<div id="urban-popup" class="side-popup">
+  <div class="popup">
+    <button class="close-btn" onclick="closePopup('urban')">&times;</button>
+    <h2>Urban Index (NDBI)</h2>
+    <div id="urban-summary" class="data-summary">
+      <div class="data-values">
+        <div class="data-card">
+          <div class="label">Urban Index</div>
+          <div id="urban-value" class="value">—</div>
+        </div>
+        <div class="data-card">
+          <div class="label">Population Density</div>
+          <div id="urban-pop-value" class="value">—</div>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-title">Legend:</div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#00ff00"></div>
+          <div class="legend-text">Natural/Agricultural (&lt;-0.2)</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#32ff96"></div>
+          <div class="legend-text">Rural Development (-0.2 - -0.1)</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#64ffc8"></div>
+          <div class="legend-text">Suburban Areas (-0.1 - 0)</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#00b4ff"></div>
+          <div class="legend-text">Urban Development (0 - 0.1)</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#0078ff"></div>
+          <div class="legend-text">Dense Urban (0.1 - 0.3)</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#003cc8"></div>
+          <div class="legend-text">Highly Urbanized (0.3 - 0.5)</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#000096"></div>
+          <div class="legend-text">Metropolitan Core (&gt;0.5)</div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="urban-chart"></canvas>
+    </div>
+  </div>
+</div>
+
+<div id="heat-popup" class="side-popup">
+  <div class="popup">
+    <button class="close-btn" onclick="closePopup('heat')">&times;</button>
+    <h2>Heat Index</h2>
+    <div id="heat-summary" class="data-summary">
+      <div class="data-values">
+        <div class="data-card">
+          <div class="label">Heat Index</div>
+          <div id="heat-value" class="value">—</div>
+        </div>
+        <div class="data-card">
+          <div class="label">Temperature</div>
+          <div id="temp-value" class="value">—</div>
+        </div>
+        <div class="data-card">
+          <div class="label">Humidity</div>
+          <div id="humidity-value" class="value">—</div>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-title">Legend:</div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:rgb(255,255,0)"></div>
+          <div class="legend-text">Moderate (&lt;30°C)</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:rgb(255,165,0)"></div>
+          <div class="legend-text">Warm (30-32°C)</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:rgb(255,0,0)"></div>
+          <div class="legend-text">Hot (32-35°C)</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:rgb(128,0,0)"></div>
+          <div class="legend-text">Very Hot (&gt;35°C)</div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="heat-chart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+// Test if Chart.js loaded properly
+window.addEventListener('load', function() {
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js failed to load');
+  } else {
+    console.log('Chart.js loaded successfully, version:', Chart.version || 'unknown');
+  }
+});
+</script>
+
+<script>
+
+// Global variables
+let map;
+let dasmaLayer;
+let currentYear = 2024;
+let currentMode = 'heat';
+let currentVisualizationMode = 'heat';
+let currentHighlight = -1;
+let currentDistrictLayer = null;
+let filteredResults = [];
+let chartInstances = {};
+let selectedFid = null;
+
+// Barangay to District mapping
+const barangayToDistrict = {
+  // FID 0 = Langkaan
+  "Langkaan I": { fid: 0, district: "Langkaan" },
+  "Langkaan II": { fid: 0, district: "Langkaan" },
+  
+  // FID 1 = Sampaloc
+  "Sampaloc I": { fid: 1, district: "Sampaloc" },
+  "Sampaloc II": { fid: 1, district: "Sampaloc" },
+  "Sampaloc III": { fid: 1, district: "Sampaloc" },
+  "Sampaloc IV": { fid: 1, district: "Sampaloc" },
+  "Sampaloc V": { fid: 1, district: "Sampaloc" },
+  
+  // FID 2 = San Agustin
+  "San Agustin I": { fid: 2, district: "San Agustin" },
+  "San Agustin II": { fid: 2, district: "San Agustin" },
+  "San Agustin III": { fid: 2, district: "San Agustin" },
+  
+  // FID 3 = Poblacion
+  "Zone I": { fid: 3, district: "Poblacion" },
+  "Zone I-B": { fid: 3, district: "Poblacion" },
+  "Zone II": { fid: 3, district: "Poblacion" },
+  "Zone III": { fid: 3, district: "Poblacion" },
+  "Zone IV": { fid: 3, district: "Poblacion" },
+  
+  // FID 4 = Salitran
+  "Salitran I": { fid: 4, district: "Salitran" },
+  "Salitran II": { fid: 4, district: "Salitran" },
+  "Salitran III": { fid: 4, district: "Salitran" },
+  "Salitran IV": { fid: 4, district: "Salitran" },
+  
+  // FID 6 = Sabang
+  "Sabang": { fid: 6, district: "Sabang" },
+  
+  // FID 7 = Salawag
+  "Salawag": { fid: 7, district: "Salawag" },
+  
+  // FID 8 = San Jose
+  "San Jose": { fid: 8, district: "San Jose" },
+  
+  // FID 9 = Paliparan
+  "Paliparan I": { fid: 9, district: "Paliparan" },
+  "Paliparan II": { fid: 9, district: "Paliparan" },
+  "Paliparan III": { fid: 9, district: "Paliparan" },
+  
+  // FID 5 = Resettlement Area (remaining barangays)
+  "Burol": { fid: 5, district: "Resettlement Area" },
+  "Burol I": { fid: 5, district: "Resettlement Area" },
+  "Burol II": { fid: 5, district: "Resettlement Area" },
+  "Burol III": { fid: 5, district: "Resettlement Area" },
+  "Datu Esmael": { fid: 5, district: "Resettlement Area" },
+  "Emmanuel Bergado I": { fid: 5, district: "Resettlement Area" },
+  "Emmanuel Bergado II": { fid: 5, district: "Resettlement Area" },
+  "Fatima I": { fid: 5, district: "Resettlement Area" },
+  "Fatima II": { fid: 5, district: "Resettlement Area" },
+  "Fatima III": { fid: 5, district: "Resettlement Area" },
+  "H-2": { fid: 5, district: "Resettlement Area" },
+  "Luzviminda I": { fid: 5, district: "Resettlement Area" },
+  "Luzviminda II": { fid: 5, district: "Resettlement Area" },
+  "Saint Peter I": { fid: 5, district: "Resettlement Area" },
+  "Saint Peter II": { fid: 5, district: "Resettlement Area" },
+  "San Andres I": { fid: 5, district: "Resettlement Area" },
+  "San Andres II": { fid: 5, district: "Resettlement Area" },
+  "San Antonio De Padua I": { fid: 5, district: "Resettlement Area" },
+  "San Antonio De Padua II": { fid: 5, district: "Resettlement Area" },
+  "San Dionisio": { fid: 5, district: "Resettlement Area" },
+  "San Esteban": { fid: 5, district: "Resettlement Area" },
+  "San Francisco I": { fid: 5, district: "Resettlement Area" },
+  "San Francisco II": { fid: 5, district: "Resettlement Area" },
+  "San Isidro Labrador I": { fid: 5, district: "Resettlement Area" },
+  "San Isidro Labrador II": { fid: 5, district: "Resettlement Area" },
+  "San Juan": { fid: 5, district: "Resettlement Area" },
+  "San Lorenzo Ruiz I": { fid: 5, district: "Resettlement Area" },
+  "San Lorenzo Ruiz II": { fid: 5, district: "Resettlement Area" },
+  "San Luis I": { fid: 5, district: "Resettlement Area" },
+  "San Luis II": { fid: 5, district: "Resettlement Area" },
+  "San Manuel I": { fid: 5, district: "Resettlement Area" },
+  "San Manuel II": { fid: 5, district: "Resettlement Area" },
+  "San Mateo": { fid: 5, district: "Resettlement Area" },
+  "San Miguel": { fid: 5, district: "Resettlement Area" },
+  "San Miguel II": { fid: 5, district: "Resettlement Area" },
+  "San Nicolas I": { fid: 5, district: "Resettlement Area" },
+  "San Nicolas II": { fid: 5, district: "Resettlement Area" },
+  "San Roque": { fid: 5, district: "Resettlement Area" },
+  "San Simon": { fid: 5, district: "Resettlement Area" },
+  "Santa Cristina I": { fid: 5, district: "Resettlement Area" },
+  "Santa Cristina II": { fid: 5, district: "Resettlement Area" },
+  "Santa Cruz I": { fid: 5, district: "Resettlement Area" },
+  "Santa Cruz II": { fid: 5, district: "Resettlement Area" },
+  "Santa Fe": { fid: 5, district: "Resettlement Area" },
+  "Santa Lucia": { fid: 5, district: "Resettlement Area" },
+  "Santa Maria": { fid: 5, district: "Resettlement Area" },
+  "Santo Cristo": { fid: 5, district: "Resettlement Area" },
+  "Santo Niño I": { fid: 5, district: "Resettlement Area" },
+  "Santo Niño II": { fid: 5, district: "Resettlement Area" },
+  "Victoria Reyes": { fid: 5, district: "Resettlement Area" }
+};
+
+const allBarangays = Object.keys(barangayToDistrict).sort();
+const districts = {
+  0: "Langkaan", 1: "Sampaloc", 2: "San Agustin", 3: "Poblacion", 
+  4: "Salitran", 5: "Resettlement Area", 6: "Sabang", 7: "Salawag", 
+  8: "San Jose", 9: "Paliparan"
+};
+
+function getGradientColor(value, minVal, maxVal, type, year = 2024) {
+  // Calculate year progress from 2020 to 2050 (0 to 1)
+  const yearProgress = Math.max(0, Math.min(1, (year - 2020) / (2050 - 2020)));
+  
+  // Adjust contrast based on year - more extreme contrast in early years
+  let adjustedMinVal = minVal;
+  let adjustedMaxVal = maxVal;
+  
+  if (type === 'vegetation') {
+    // More realistic contrast adjustment for vegetation
+    // 2020: 1.8x contrast (better distinction), 2050: 1.0x contrast (normal)
+    const contrastMultiplier = 1.8 - (yearProgress * 0.8);
+    const center = (minVal + maxVal) / 2;
+    const baseRange = maxVal - minVal;
+    const newRange = baseRange / contrastMultiplier;
+    
+    adjustedMinVal = Math.max(0.1, center - newRange / 2); // Keep minimum realistic NDVI
+    adjustedMaxVal = Math.min(0.8, center + newRange / 2); // Keep maximum realistic NDVI
+}  else if (type === 'urban') {
+    // Realistic contrast adjustment for urban development
+    // 2020: 1.6x contrast (better distinction), 2050: 1.0x contrast (normal)
+    const contrastMultiplier = 1.6 - (yearProgress * 0.6);
+    const center = (minVal + maxVal) / 2;
+    const baseRange = maxVal - minVal;
+    const newRange = baseRange / contrastMultiplier;
+    
+    adjustedMinVal = Math.max(-0.4, center - newRange / 2); // Keep realistic NDBI minimum
+    adjustedMaxVal = Math.min(0.6, center + newRange / 2);  // Keep realistic NDBI maximum
+}
+  
+  const ratio = Math.max(0, Math.min(1, (value - adjustedMinVal) / (adjustedMaxVal - adjustedMinVal)));
+  
+  if (type === 'vegetation') {
+    // More realistic vegetation colors
+    const colors = [
+      {r: 245, g: 245, b: 240}, // Very light beige - sparse vegetation
+      {r: 220, g: 210, b: 180}, // Light tan
+      {r: 200, g: 220, b: 140}, // Light green
+      {r: 145, g: 191, b: 81},  // Medium green
+      {r: 112, g: 163, b: 63},  // Dark green
+      {r: 79, g: 137, b: 45},   // Very dark green
+      {r: 48, g: 109, b: 28}    // Forest green
+    ];
+    return interpolateColors(colors, ratio);
+  }    else if (type === 'urban') {
+    // Enhanced urban development colors - more dramatic range
+    const colors = [
+      {r: 0, g: 255, b: 0},     // Bright green - natural/agricultural
+      {r: 50, g: 255, b: 150},  // Light green-cyan
+      {r: 100, g: 255, b: 200}, // Light cyan - low development
+      {r: 0, g: 180, b: 255},   // Sky blue - moderate development  
+      {r: 0, g: 120, b: 255},   // Blue - high development
+      {r: 0, g: 60, b: 200},    // Dark blue - dense urban
+      {r: 0, g: 0, b: 150}      // Navy - very dense urban
+    ];
+    return interpolateColors(colors, ratio);
+    
+  } else {
+    // Heat colors remain the same
+    const colors = [
+      {r: 255, g: 255, b: 0},   // Yellow
+      {r: 255, g: 165, b: 0},   // Orange
+      {r: 255, g: 0, b: 0},     // Red
+      {r: 128, g: 0, b: 0}      // Dark Red
+    ];
+    return interpolateColors(colors, ratio);
+  }
+}
+
+function interpolateColors(colors, ratio) {
+  const segments = colors.length - 1;
+  const segmentSize = 1 / segments;
+  const segmentIndex = Math.min(Math.floor(ratio / segmentSize), segments - 1);
+  const segmentRatio = (ratio - (segmentIndex * segmentSize)) / segmentSize;
+  
+  const color1 = colors[segmentIndex];
+  const color2 = colors[segmentIndex + 1];
+  
+  const r = Math.round(color1.r + (color2.r - color1.r) * segmentRatio);
+  const g = Math.round(color1.g + (color2.g - color1.g) * segmentRatio);
+  const b = Math.round(color1.b + (color2.b - color1.b) * segmentRatio);
+  
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+
+// Initialize map and layers
+function initializeMap() {
+  const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+    maxZoom: 19, attribution: '© OpenStreetMap' 
+  });
+  const osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { 
+    maxZoom: 19, attribution: '© OpenStreetMap contributors' 
+  });
+  const Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { 
+    maxZoom: 19, attribution: 'Tiles © Esri' 
+  });
+
+    map = L.map('map', { 
+    center: [14.3106, 120.9684], 
+    zoom: 13, 
+    minZoom: 11,
+    maxZoom: 16,
+    layers: [Esri_WorldImagery] 
+  });
+
+  const baseMaps = { 
+    'Satellite': Esri_WorldImagery, 
+    'Street Map': osm, 
+    'OpenStreetMap HOT': osmHOT 
+  };
+  L.control.layers(baseMaps).addTo(map);
+
+  // Load GeoJSON
+  fetch('settlement_dasma.geojson')
+    .then(r => r.json())
+    .then(geojson => {
+      dasmaLayer = L.geoJSON(geojson, {
+        style: function() { 
+          return { color: '#FFBF00', weight: 1.5, fillOpacity: 0 }; 
+        },
+        onEachFeature: function(feature, layer) {
+          const fid = feature.properties.FID;
+          const districtName = districts[fid] || `District ${fid}`;
+          
+          layer.bindPopup(`<b>${districtName}</b><br>FID: ${fid}`);
+          layer.on('click', function() { 
+            highlightDistrict(fid);
+            openDataPopupForDistrict(fid);
+          });
+        }
+      }).addTo(map);
+
+      // Set map bounds
+      const bounds = dasmaLayer.getBounds();
+      const expandedBounds = L.latLngBounds(
+        [bounds.getSouth() - 0.03, bounds.getWest() - 0.01],
+        [bounds.getNorth() + 0.01, bounds.getEast() + 0.01]
+      );
+      map.setMaxBounds(expandedBounds);
+      map.setMinZoom(12);
+      map.setMaxZoom(16);
+
+      // Initial visualization
+      updateVisualization();
+    })
+    .catch(err => console.error('Error loading geojson:', err));
+
+  // Add user location if in Dasmariñas area
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function (position) {
+      var lat = position.coords.latitude;
+      var lng = position.coords.longitude;
+      var accuracy = position.coords.accuracy;
+
+      if (lat > 14.15 && lat < 14.5 && lng > 120.8 && lng < 121.0) {
+        L.marker([lat, lng]).addTo(map)
+          .bindPopup('You are here')
+          .openPopup();
+
+        L.circle([lat, lng], {
+          radius: accuracy,
+          color: 'blue',
+          fillColor: '#30f',
+          fillOpacity: 0.2
+        }).addTo(map);
+      }
+    });
+  }
+}
+
+// Search functionality
+function normalizeBarangayName(name) {
+  let n = name.toLowerCase();
+  n = n.replace(/\bv\b/g, '5')
+       .replace(/\biv\b/g, '4')
+       .replace(/\biii\b/g, '3')
+       .replace(/\bii\b/g, '2')
+       .replace(/\bi\b/g, '1');
+  n = n.replace(/\b5\b/g, 'v')
+       .replace(/\b4\b/g, 'iv')
+       .replace(/\b3\b/g, 'iii')
+       .replace(/\b2\b/g, 'ii')
+       .replace(/\b1\b/g, 'i');
+  n = n.replace(/\s+/g, ' ').trim();
+  return n;
+}
+
+function searchBarangays(query) {
+  const q = normalizeBarangayName(query);
+  const startsWith = [];
+  const contains = [];
+
+  allBarangays.forEach(barangay => {
+    const nameNorm = normalizeBarangayName(barangay);
+    if (nameNorm.startsWith(q)) {
+      startsWith.push(barangay);
+    } else if (nameNorm.includes(q)) {
+      contains.push(barangay);
+    }
+  });
+
+  return [...startsWith.sort(), ...contains.sort()].slice(0, 8);
+}
+
+function displayResults(results) {
+  const searchDropdown = document.getElementById('searchDropdown');
+  if (!searchDropdown) return;
+
+  if (results.length === 0) {
+    searchDropdown.innerHTML = '<div class="no-results">No barangays found</div>';
+    searchDropdown.style.display = 'block';
+    return;
+  }
+
+  const rawQuery = document.getElementById('brgy').value.trim();
+  const queryBase = rawQuery.replace(/\s*(?:[ivx]+|\d+)\s*$/i, '').trim();
+
+  const html = results.map(barangay => {
+    const data = barangayToDistrict[barangay];
+    let displayedName = barangay;
+
+    if (queryBase.length > 0) {
+      const pattern = queryBase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp(pattern, 'i');
+      displayedName = barangay.replace(re, match => `<span class="highlight">${match}</span>`);
+    }
+
+    const safeName = barangay.replace(/'/g, "\\'");
+
+    return `
+      <div class="dropdown-item" onclick="selectBarangay('${safeName}')">
+        <span class="barangay-name">${displayedName}</span>
+        <span class="district-info">${data.district}</span>
+      </div>
+    `;
+  }).join('');
+
+  searchDropdown.innerHTML = html;
+  searchDropdown.style.display = 'block';
+  currentHighlight = -1;
+}
+
+function selectBarangay(barangay) {
+  const data = barangayToDistrict[barangay];
+  document.getElementById('brgy').value = barangay;
+  document.getElementById('searchDropdown').style.display = 'none';
+  
+  highlightDistrict(data.fid);
+  openDataPopupForDistrict(data.fid);
+}
+
+function highlightDistrict(fid) {
+  selectedFid = fid;
+  
+  // Remove previous highlight
+  if (currentDistrictLayer) {
+    currentDistrictLayer.setStyle({
+      color: '#333',
+      weight: 1
+    });
+  }
+  
+  // Highlight new district
+  if (dasmaLayer) {
+    dasmaLayer.eachLayer((layer) => {
+      if (layer.feature && layer.feature.properties.FID === fid) {
+        // Keep same fill color, just change border
+        layer.setStyle({
+          color: '#000000', // Black border for selection
+          weight: 3
+        });
+        
+        map.fitBounds(layer.getBounds(), { padding: [20, 20] });
+        currentDistrictLayer = layer;
+        
+        layer.bindPopup(`
+          <div style="text-align: center;">
+            <strong style="color: #000000;">${districts[fid]}</strong><br>
+            <small>Click sidebar buttons for detailed data</small>
+          </div>
+        `).openPopup();
+      }
+    });
+  }
+}
+
+// Visualization updates with backend integration
+function updateVisualization() {
+  const mode = currentVisualizationMode;
+  const year = currentYear;
+  
+  let endpoint;
+  switch(mode) {
+    case 'vegetation':
+      endpoint = `/api/visualization/ndvi/${year}`;
+      break;
+    case 'urban':
+      endpoint = `/api/visualization/ndbi/${year}`;
+      break;
+    default:
+      endpoint = `/api/visualization/heat-index/${year}`;
+  }
+
+  console.log(`Fetching from: ${endpoint}`);
+
+  fetch(endpoint)
+    .then(r => r.json())
+    .then(resp => {
+      if (!resp.success) {
+        console.error('Visualization error:', resp.error);
+        return;
+      }
+      
+      // Get min/max values for gradient calculation
+      // Get min/max values for gradient calculation
+let values = [];
+let minVal, maxVal;
+
+if (mode === 'vegetation') {
+  values = resp.districts.map(d => d.ndvi).filter(v => v != null);
+  minVal = 0.0;  // Start at 0 so negative values show as gray
+  maxVal = 0.6;  // Tighter max for more contrast in low vegetation
+} else if (mode === 'urban') {
+  values = resp.districts.map(d => d.ndbi).filter(v => v != null);
+  minVal = -0.3; // Much wider range to prevent all blue
+  maxVal = 0.8;  // Accommodate future urban development
+} else {
+  values = resp.districts.map(d => d.heat_index).filter(v => v != null);
+  minVal = 26;   // Keep heat range as is since it works
+  maxVal = 38;   
+}
+
+const lookup = {};
+resp.districts.forEach(d => {
+  let value;
+  if (mode === 'vegetation') value = d.ndvi;
+  else if (mode === 'urban') value = d.ndbi;
+  else value = d.heat_index;
+  
+ d.color = getGradientColor(value, minVal, maxVal, mode, currentYear);
+  lookup[d.fid] = d;
+});
+
+       if (dasmaLayer) {
+        dasmaLayer.eachLayer(layer => {
+          const fid = layer.feature && layer.feature.properties && layer.feature.properties.FID;
+          if (fid != null && lookup[fid]) {
+            const district = lookup[fid];
+            
+            layer.setStyle({ 
+              fillColor: district.color, 
+              fillOpacity: 0.7, 
+              color: currentDistrictLayer === layer ? '#000000' : '#333', 
+              weight: currentDistrictLayer === layer ? 3 : 1
+            });
+            
+            // Update popup content based on mode
+            let popupContent = `<strong>${district.district}</strong><br>`;
+            if (mode === 'vegetation') {
+              popupContent += `NDVI: ${district.ndvi}`;
+            } else if (mode === 'urban') {
+              popupContent += `NDBI: ${district.ndbi}`;
+            } else {
+              popupContent += `Heat Index: ${district.heat_index}°C`;
+            }
+            
+            layer.bindPopup(popupContent);
+          }
+        });
+      }
+      
+    })
+    .catch(err => console.error('Visualization load error:', err));
+}
+
+
+
+function showFallbackVisualization(mode) {
+  console.log('Using fallback visualization for:', mode);
+  // Simple fallback colors when backend is not available
+  if (dasmaLayer) {
+    dasmaLayer.eachLayer(layer => {
+      if (currentDistrictLayer !== layer) {
+        layer.setStyle({ 
+          fillColor: mode === 'vegetation' ? '#88FF00' : mode === 'urban' ? '#00CCFF' : '#FFCC00', 
+          fillOpacity: 0.4, 
+          color: '#333', 
+          weight: 1 
+        });
+      }
+    });
+  }
+}
+
+// Data popup management
+function openDataPopup(type) {
+  currentVisualizationMode = type; // Set current mode
+  updateVisualization(); // Update map colors
+  
+  // Close all other popups
+  document.querySelectorAll('.side-popup.active').forEach(p => {
+    p.classList.remove('active');
+  });
+
+  // Open selected popup
+  const popup = document.getElementById(type + '-popup');
+  if (popup) {
+    popup.classList.add('active');
+    document.body.classList.add('popup-open');
+    
+    // Load data if a district is selected
+    if (selectedFid !== null) {
+      loadDataForPopup(selectedFid, type);
+    } else {
+      // Show message to select district first
+      updatePopupWithMessage(type, 'Please select a district on the map first');
+    }
+  }
+}
+
+function openDataPopupForDistrict(fid) {
+  selectedFid = fid;
+  const mode = currentVisualizationMode;
+  let popupType;
+  
+  switch(mode) {
+    case 'vegetation':
+      popupType = 'vegetation';
+      break;
+    case 'urban':
+      popupType = 'urban';
+      break;
+    default:
+      popupType = 'heat';
+  }
+  
+  openDataPopup(popupType);
+}
+
+function closePopup(type) {
+  const popup = document.getElementById(type + '-popup');
+  if (popup) {
+    popup.classList.remove('active');
+  }
+
+  if (!document.querySelector('.side-popup.active')) {
+    document.body.classList.remove('popup-open');
+  }
+}
+
+function loadDataForPopup(fid, type) {
+  console.log(`Loading time series data for FID ${fid}, type ${type}`);
+  
+  fetch(`/api/time-series/${fid}`)
+    .then(r => {
+      if (!r.ok) {
+        throw new Error(`HTTP error! status: ${r.status}`);
+      }
+      return r.json();
+    })
+    .then(resp => {
+      if (!resp.success) {
+        console.error('Time series error:', resp.error);
+        updatePopupWithMessage(type, 'Error loading data from server');
+        return;
+      }
+
+      // Filter data to dynamic year range based on current year
+      const filteredData = getYearRangeData(resp.data, currentYear);
+      updatePopupData(filteredData, type);
+      createChart(filteredData, type);
+    })
+    .catch(err => {
+      console.error('Time series load error:', err);
+      updatePopupWithMessage(type, 'Server connection failed - using sample data');
+      // Show sample data as fallback
+      showSampleData(fid, type);
+    });
+}
+
+function getYearRangeData(data, selectedYear) {
+  // Determine start year based on selected year
+  let startYear, endYear;
+  
+  if (selectedYear <= 2020) {
+    startYear = 2020;
+    endYear = 2030;
+  } else if (selectedYear >= 2050) {
+    startYear = 2040;
+    endYear = 2050;
+  } else {
+    // Round down to nearest decade start
+    const decadeStart = Math.floor((selectedYear - 2020) / 10) * 10 + 2020;
+    startYear = decadeStart;
+    endYear = Math.min(decadeStart + 10, 2050);
+    
+    // If selected year is past the decade middle, show up to selected year + some buffer
+    if (selectedYear > decadeStart + 5) {
+      endYear = Math.min(selectedYear + 5, 2050);
+    }
+  }
+  
+  console.log(`Year range for ${selectedYear}: ${startYear}-${endYear}`);
+  
+  // Filter data to the calculated range
+  return data.filter(d => d.year >= startYear && d.year <= endYear);
+}
+
+function updatePopupWithMessage(type, message) {
+  const valueElements = document.querySelectorAll(`#${type}-popup .value`);
+  valueElements.forEach(el => el.textContent = message);
+}
+
+function showSampleData(fid, type) {
+  // Fallback sample data when backend is not available
+  const sampleData = generateSampleTimeSeries(fid);
+  const filteredData = getYearRangeData(sampleData, currentYear);
+  console.log('Sample data for chart:', filteredData);
+  updatePopupData(filteredData, type);
+  
+  // Add small delay to ensure DOM is ready
+  setTimeout(() => {
+    createChart(filteredData, type);
+  }, 100);
+}
+
+function generateSampleTimeSeries(fid) {
+  const data = [];
+  const districtName = districts[fid];
+  
+  for (let year = 2020; year <= 2050; year++) {
+    // Generate realistic sample data based on district characteristics
+    const baseTemp = 28 + (fid * 0.5); // Different base temps per district
+    const yearOffset = (year - 2020) * 0.1; // Slight warming trend
+    
+    data.push({
+      year: year,
+      fid: fid,
+      district: districtName,
+      heat_index: baseTemp + yearOffset + (Math.random() * 2 - 1),
+      temperature: baseTemp - 2 + yearOffset + (Math.random() * 1.5 - 0.75),
+      humidity: 70 + (Math.random() * 10 - 5),
+      ndvi: 0.3 + (fid % 3) * 0.15 + (Math.random() * 0.1 - 0.05),
+      ndbi: 0.2 + (fid % 4) * 0.2 + (Math.random() * 0.1 - 0.05),
+      pop_density: 5000 + (fid * 1000) + (year - 2020) * 100,
+      is_forecast: year > 2024
+    });
+  }
+  
+  return data;
+}
+
+function updatePopupData(data, type) {
+  const currentData = data.find(d => d.year === currentYear) || data[data.length - 1];
+  
+  if (type === 'vegetation') {
+    document.getElementById('vegetation-value').textContent = 
+      currentData.ndvi ? currentData.ndvi.toFixed(3) : '—';
+  } else if (type === 'urban') {
+    document.getElementById('urban-value').textContent = 
+      currentData.ndbi ? currentData.ndbi.toFixed(3) : '—';
+    document.getElementById('urban-pop-value').textContent = 
+      currentData.pop_density ? Math.round(currentData.pop_density).toLocaleString() + ' /km²' : '—';
+  } else if (type === 'heat') {
+    document.getElementById('heat-value').textContent = 
+      currentData.heat_index ? currentData.heat_index.toFixed(1) + '°C' : '—';
+    document.getElementById('temp-value').textContent = 
+      currentData.temperature ? currentData.temperature.toFixed(1) + '°C' : '—';
+    document.getElementById('humidity-value').textContent = 
+      currentData.humidity ? currentData.humidity.toFixed(1) + '%' : '—';
+  }
+}
+
+function createChart(data, type) {
+  console.log('Creating chart for:', type, 'with data:', data);
+  
+  const chartId = type + '-chart';
+  const canvas = document.getElementById(chartId);
+  
+  if (!canvas) {
+    console.error('Canvas not found:', chartId);
+    return;
+  }
+
+  // Destroy existing chart
+  if (chartInstances[chartId]) {
+    chartInstances[chartId].destroy();
+    delete chartInstances[chartId];
+  }
+
+  // Wait for Chart.js to load
+  if (typeof Chart === 'undefined') {
+    console.log('Chart.js not loaded yet, retrying...');
+    setTimeout(() => createChart(data, type), 500);
+    return;
+  }
+
+  // Prepare data
+  const years = data.map(d => d.year);
+  let values, label, color;
+  
+  if (type === 'vegetation') {
+    values = data.map(d => d.ndvi || 0);
+    label = 'NDVI';
+    color = '#4f892d';
+  } else if (type === 'urban') {
+    values = data.map(d => d.ndbi || 0);
+    label = 'NDBI'; 
+    color = '#0066FF';
+  } else {
+    values = data.map(d => d.heat_index || 0);
+    label = 'Heat Index (°C)';
+    color = '#FF6600';
+  }
+
+  // Create chart
+  try {
+    chartInstances[chartId] = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: years,
+        datasets: [{
+          label: label,
+          data: values,
+          borderColor: color,
+          backgroundColor: color + '30',
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            display: true,
+            text: `${districts[selectedFid]} - ${label}`
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: false
+          }
+        }
+      }
+    });
+    console.log('Chart created successfully');
+  } catch (error) {
+    console.error('Chart creation error:', error);
+  }
+}
+
+
+// Event handlers
+function setupEventHandlers() {
+  // Welcome popup
+  const popupOverlay = document.getElementById('popupOverlay');
+  const acceptBtn = document.getElementById('acceptBtn');
+  
+  window.addEventListener('load', function() {
+    setTimeout(() => {
+      popupOverlay.classList.add('active');
+    }, 500);
+  });
+
+  acceptBtn.addEventListener('click', function() {
+    popupOverlay.classList.remove('active');
+  });
+
+  // Search functionality
+  const searchInput = document.getElementById('brgy');
+  const searchDropdown = document.getElementById('searchDropdown');
+
+  searchInput.addEventListener('input', function() {
+    const query = this.value.trim();
+    if (query.length === 0) {
+      searchDropdown.style.display = 'none';
+      return;
+    }
+    filteredResults = searchBarangays(query);
+    displayResults(filteredResults);
+  });
+
+  searchInput.addEventListener('keydown', function(e) {
+    const items = searchDropdown.querySelectorAll('.dropdown-item');
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      currentHighlight = (currentHighlight + 1) % items.length;
+      updateHighlight(items);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      currentHighlight = currentHighlight <= 0 ? items.length - 1 : currentHighlight - 1;
+      updateHighlight(items);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (currentHighlight >= 0 && items[currentHighlight]) {
+        const barangayName = items[currentHighlight].querySelector('.barangay-name').textContent;
+        selectBarangay(barangayName);
+      }
+    } else if (e.key === 'Escape') {
+      searchDropdown.style.display = 'none';
+    }
+  });
+
+  // Year slider
+  const yearSlider = document.getElementById('yearSlider');
+  const yearDisplay = document.getElementById('yearDisplay');
+
+  yearSlider.addEventListener('input', function() {
+    currentYear = parseInt(this.value, 10);
+    yearDisplay.textContent = currentYear;
+    updateVisualization();
+    
+    // Update popup data if open - with new year range logic
+    if (selectedFid !== null) {
+      const activePopup = document.querySelector('.side-popup.active');
+      if (activePopup) {
+        const popupType = activePopup.id.replace('-popup', '');
+        loadDataForPopup(selectedFid, popupType);
+      }
+    }
+  });
+
+  // Visualization mode selector
+
+  // Click outside to close dropdown
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.search-container')) {
+      searchDropdown.style.display = 'none';
+    }
+  });
+
+  // Clear highlight when clicking map
+  // Clear highlight when clicking map
+  if (map) {
+    map.on('click', function(e) {
+      if (!e.originalEvent.target.closest('.leaflet-interactive')) {
+        if (currentDistrictLayer) {
+          // Just remove border highlight, keep gradient colors
+          currentDistrictLayer.setStyle({
+            color: '#333',
+            weight: 1
+          });
+          currentDistrictLayer = null;
+          selectedFid = null;
+        }
+      }
+    });
+  }
+}
+
+function updateHighlight(items) {
+  items.forEach((item, index) => {
+    item.classList.toggle('highlighted', index === currentHighlight);
+  });
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Initializing IN-HEAT application...');
+  initializeMap();
+  setupEventHandlers();
+  
+  // Test backend connection
+  fetch('/api/visualization/heat-index/2024')
+    .then(r => r.json())
+    .then(resp => {
+      if (resp.success) {
+        console.log('✅ Backend connection successful');
+      } else {
+        console.log('⚠️ Backend available but returned error:', resp.error);
+      }
+    })
+    .catch(err => {
+      console.log('⚠️ Backend not available, using fallback mode:', err.message);
+    });
+});
+
+// Make functions globally accessible
+window.openDataPopup = openDataPopup;
+window.closePopup = closePopup;
+window.selectBarangay = selectBarangay;
+window.highlightDistrict = highlightDistrict;
+</script>
+
+</body>
+</html>
