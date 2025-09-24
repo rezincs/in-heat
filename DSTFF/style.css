@@ -447,7 +447,7 @@ hr {
 
 /* Side Popups */
 .side-popup {
-  position: fixed;
+  position: relative;
   top: 60%;
   right: -400px;
   transform: translateY(-50%);
@@ -653,6 +653,7 @@ hr {
   }
 
 }
+
 
 
 
