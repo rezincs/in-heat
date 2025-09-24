@@ -226,24 +226,26 @@
         </div>
       </div>
       <div class="legend">
-        <div class="legend-title">Legend:</div>
-        <div class="legend-item">
-          <div class="legend-color" style="background:rgb(255,255,0)"></div>
-          <div class="legend-text">Moderate (&lt;30°C)</div>
-        </div>
-        <div class="legend-item">
-          <div class="legend-color" style="background:rgb(255,165,0)"></div>
-          <div class="legend-text">Warm (30-32°C)</div>
-        </div>
-        <div class="legend-item">
-          <div class="legend-color" style="background:rgb(255,0,0)"></div>
-          <div class="legend-text">Hot (32-35°C)</div>
-        </div>
-        <div class="legend-item">
-          <div class="legend-color" style="background:rgb(128,0,0)"></div>
-          <div class="legend-text">Very Hot (&gt;35°C)</div>
-        </div>
-      </div>
+  <div class="legend-title">Legend:</div>
+  <div class="legend">
+  <div class="legend-title">Legend:</div>
+  <div class="legend-item">
+    <div class="legend-color" style="background:rgb(255,255,0)"></div>
+    <div class="legend-text">Caution (27-32°C)</div>
+  </div>
+  <div class="legend-item">
+    <div class="legend-color" style="background:rgb(255,165,0)"></div>
+    <div class="legend-text">Extreme Caution (32-41°C)</div>
+  </div>
+  <div class="legend-item">
+    <div class="legend-color" style="background:rgb(255,0,0)"></div>
+    <div class="legend-text">Danger (41-54°C)</div>
+  </div>
+  <div class="legend-item">
+    <div class="legend-color" style="background:rgb(128,0,0)"></div>
+    <div class="legend-text">Extreme Danger (&gt;54°C)</div>
+  </div>
+</div>
     </div>
     <div class="chart-container">
       <canvas id="heat-chart"></canvas>
@@ -710,8 +712,8 @@ if (mode === 'vegetation') {
   maxVal = 0.8;  // Accommodate future urban development
 } else {
   values = resp.districts.map(d => d.heat_index).filter(v => v != null);
-  minVal = 26;   // Keep heat range as is since it works
-  maxVal = 38;   
+  minVal = 27;   // Updated to match the 27-32°C range
+  maxVal = 50;   // Extended range to show danger levels
 }
 
 const lookup = {};
@@ -1170,5 +1172,3 @@ window.highlightDistrict = highlightDistrict;
 
 </body>
 </html>
-
-
