@@ -456,6 +456,7 @@ hr {
   opacity: 0;
   visibility: hidden;
   transition: all 0.4s ease;
+  overflow-y: auto;
 }
 
 .side-popup.active {
@@ -652,6 +653,7 @@ hr {
   }
 
 }
+
 
 
 
