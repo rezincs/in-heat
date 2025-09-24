@@ -17,13 +17,6 @@ body {
   user-select: none;
 }
 
-.scale-container {
-  transform: scale(0.9);
-  transform-origin: top left;
-  width: 111.11%;
-  height: 111.11vh;
-}
-
 /* Welcome Popup */
 .popup-overlay {
   position: fixed;
@@ -659,6 +652,7 @@ hr {
   }
 
 }
+
 
 
 
