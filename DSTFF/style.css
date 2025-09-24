@@ -1,5 +1,6 @@
 /* Reset and Base Styles */
 html {
+  zoom: 0.9;
   scroll-behavior: smooth;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -8,7 +9,6 @@ html {
 }
 
 body {
-  transform: scale(0.9);
   background-color: #e6dada;
   margin: 0;
   font-family: Arial, sans-serif;
@@ -653,4 +653,5 @@ hr {
   }
 
 }
+
 
