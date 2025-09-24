@@ -450,7 +450,7 @@ hr {
   position: relative;
   top: 60%;
   right: -400px;
-  transform: translateY(-50%);
+  transform: translateY(-50%) scale(0.9);
   width: 380px;
   border-radius: 16px;
   z-index: 2000;
@@ -653,6 +653,7 @@ hr {
   }
 
 }
+
 
 
 
