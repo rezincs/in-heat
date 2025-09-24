@@ -49,7 +49,7 @@ body {
   width: 90%;
   position: relative;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  transform: translateY(-50px) scale(0.9);
+  transform: translateY(-50px) scale(0.8);
   transition: all 0.3s ease;
   text-align: center;
   color: white;
@@ -654,6 +654,7 @@ hr {
   }
 
 }
+
 
 
 
