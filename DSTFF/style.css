@@ -8,10 +8,6 @@ html {
 }
 
 body {
-  transform: scale(0.9);
-  transform-origin: top left;
-  width: 111.11%; /* 100% ÷ 0.9 = 111.11% */
-  height: 111.11vh;
   background-color: #e6dada;
   margin: 0;
   font-family: Arial, sans-serif;
@@ -19,6 +15,13 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.scale-container {
+  transform: scale(0.9);
+  transform-origin: top left;
+  width: 111.11%;
+  height: 111.11vh;
 }
 
 /* Welcome Popup */
@@ -656,6 +659,7 @@ hr {
   }
 
 }
+
 
 
 
