@@ -8,6 +8,7 @@ html {
 }
 
 body {
+  transform: scale(0.9);
   background-color: #e6dada;
   margin: 0;
   font-family: Arial, sans-serif;
@@ -652,3 +653,4 @@ hr {
   }
 
 }
+
